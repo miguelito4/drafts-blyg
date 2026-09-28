@@ -1,0 +1,12 @@
+{
+  "name": "drafts-blyg",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Publish Blygger fragments from your phone with a one-tap Drafts action.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:live": "node test/live.mjs"
+  },
+  "license": "MIT"
+}

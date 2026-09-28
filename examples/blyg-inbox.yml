@@ -1,0 +1,78 @@
+# blyg inbox — for sites that stamp fragments at COMMIT time (e.g. a
+# pre-commit hook that assigns ids, versions, hashes).
+#
+# Problem: the Drafts action commits through the GitHub API, which never runs
+# your local git hooks. An unstamped fragment can then fail your build.
+#
+# Fix: point the Drafts action at an inbox folder your build ignores
+# (CONFIG.dir = "blyg-inbox"). This job moves each inbox file into your
+# fragments folder and commits with your hooks enabled, so the SAME stamper
+# runs in CI that runs on your laptop.
+#
+# Do not run your stamper directly before `git commit`: the hook will run
+# again and may reject what it just stamped.
+#
+# Deploy: git-integrated hosts (Cloudflare Pages, Netlify, Vercel) build the
+# bot's commit like any push. If you deploy from GitHub Actions instead, note
+# that pushes made with GITHUB_TOKEN don't trigger other workflows; add your
+# deploy as a step here or chain it with `workflow_run`.
+#
+# Failure mode: if the stamper rejects a fragment, the commit aborts, the run
+# goes red, and the file stays in the inbox. Nothing broken reaches the site.
+
+name: blyg inbox
+
+on:
+  push:
+    branches: [main]
+    paths: ['blyg-inbox/**']
+  workflow_dispatch:
+
+concurrency:
+  group: blyg-inbox
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  INBOX: blyg-inbox                    # must match CONFIG.dir in the Drafts action
+  DEST: src/content/fragments          # TODO: folder your build reads fragments from
+  HOOKS: .githooks                     # TODO: your hooks dir (or .git/hooks setup, husky, etc.)
+
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4      # checks out a local `main` branch, not a detached HEAD
+
+      # TODO: install whatever your stamper needs. Examples:
+      #   pnpm: pnpm/action-setup@v4 + setup-node (cache: pnpm) + pnpm install --frozen-lockfile
+      #   npm:  setup-node (cache: npm) + npm ci
+      - uses: pnpm/action-setup@v4     # reads "packageManager" from package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Move inbox → fragments, commit through the stamping hook
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=("$INBOX"/*.md)
+          if [ ${#files[@]} -eq 0 ]; then echo "Inbox empty."; exit 0; fi
+
+          mkdir -p "$DEST"
+          for f in "${files[@]}"; do
+            git mv "$f" "$DEST/$(basename "$f")"
+          done
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config core.hooksPath "$HOOKS"
+
+          git commit -m "blyg: publish ${#files[@]} fragment(s) from inbox"
+
+          # One retry if a laptop push landed meanwhile.
+          git push || { git pull --rebase && git push; }
