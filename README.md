@@ -2,6 +2,8 @@
 
 Publish [Blygger](https://blygger.org) fragments from your phone as easily as posting a tweet: open a blank draft, type, tap **Blyg**.
 
+**Install:** [Publish to blyg in the Drafts Directory](https://directory.getdrafts.com/a/27p), then follow [Setup](#setup) to create a token and fill in `CONFIG`.
+
 It's a single [Drafts](https://getdrafts.com) action. It needs no server, no plugin, and no app of its own. The action commits your draft to your site's GitHub repo, and your existing deploy does the rest.
 
 ```
