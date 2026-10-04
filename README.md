@@ -6,7 +6,7 @@ Two [Drafts](https://getdrafts.com) actions, one per kind of blyg. Each is a sin
 
 | Your blyg runs on… | Use | How it publishes |
 |---|---|---|
-| **Blygger Studio** 0.9 or later (most blygs) | [`publish-to-studio.js`](src/publish-to-studio.js) | Studio's documented owner API: signs in, creates the item, publishes it |
+| **Blygger Studio** 0.9 or later (most blygs) | [`publish-to-studio.js`](src/publish-to-studio.js) — **Install:** [Drafts Directory](https://directory.getdrafts.com/a/27v) | Studio's documented owner API: signs in, creates the item, publishes it |
 | **A static site built from a git repo** | [`publish-to-blyg.js`](src/publish-to-blyg.js) — **Install:** [Drafts Directory](https://directory.getdrafts.com/a/27p) | GitHub Contents API: commits a file, and your deploy does the rest |
 
 Not sure? `curl -s https://your-blyg/blyg.json` and look at `generator`. `blygger-studio/…` means Studio.
@@ -35,7 +35,7 @@ No build, no deploy wait: the item is live as soon as Studio publishes it. Teste
 
 ### Setup
 
-1. In Drafts: new action, one **Script** step, paste [`src/publish-to-studio.js`](src/publish-to-studio.js) into the step's editor (not the action's description box).
+1. Install from the [Drafts Directory](https://directory.getdrafts.com/a/27v), or in Drafts: new action, one **Script** step, paste [`src/publish-to-studio.js`](src/publish-to-studio.js) into the step's editor (not the action's description box).
 2. Edit `CONFIG`:
 
    | key | meaning |
